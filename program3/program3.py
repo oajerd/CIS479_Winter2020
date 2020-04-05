@@ -10,7 +10,39 @@ class QLearning(object):
         self.map = maze_map
 
     def run_cycle(self):
-        return
+        good_node = False
+        
+        # find a random start location that is not a wall
+        while good_node == False:
+            x_start = random.randint(0, 7)
+            y_start = random.randint(0, 6)
+            self.current_location = [x_start, y_start]
+            current_node = self.map[self.current_location[0], self.current_location[1]]
+            if current_node.isWall == False:
+                good_node = True
+
+        found_goal = False
+
+        while found_goal == False:
+            current_node = self.map[self.current_location[0], self.current_location[1]]
+            if current_node.qNorth == 100.0:
+                found_goal = True
+            else:
+                action = self.determine_action(current)
+                next_location = self.calculate_next_location(current_node, action, current_location[0], current_location[1])
+
+                # update the n value for the current state and action
+                n_updated = self.calculate_n(current_node, action)
+                if action == "n":
+                    self.map[self.current_location[0], self.current_location[1]].nNorth = n_updated
+                if action == "e":
+                    self.map[self.current_location[0], self.current_location[1]].nEast = n_updated
+                if action == "s":
+                    self.map[self.current_location[0], self.current_location[1]].nSouth = n_updated
+                if action == "w":
+                    self.map[self.current_location[0], self.current_location[1]].nWest = n_updated
+
+
 
     def determine_action(self, node):
         seed(1)
@@ -44,7 +76,7 @@ class QLearning(object):
 
         return action
 
-    def calculate_q(self, current, reward, action, next):
+    def calculate_q(self, current, action, next):
         updated_q = 0
         current_q = 0
         current_n = 0
@@ -95,8 +127,7 @@ class QLearning(object):
         
         return n
 
-    def calculate_next_location(self, current, x, y):
-        action = self.determine_action(current)
+    def calculate_next_location(self, current, action, x, y):
         next_location = [0,0]
 
         drift_prob = random()
