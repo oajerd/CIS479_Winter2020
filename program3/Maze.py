@@ -23,7 +23,7 @@ class Map(object):
         self._goal_file = goal_file
         self.map = [[Node(False, [0.0,0.0,0.0,0.0],[0,0,0,0]) for i in range(size_x)] for j in range(size_y)]
 
-        self.setup_maze()
+        self.setup_map()
 
     def setup_map(self):
 
