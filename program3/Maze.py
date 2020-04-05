@@ -23,7 +23,7 @@ class Map(object):
         self._goal_file = goal_file
         self.map = [[Node(False, [0.0,0.0,0.0,0.0],[0,0,0,0]) for i in range(size_x)] for j in range(size_y)]
 
-        self.setup_maze()
+        self.setup_map()
 
     def setup_map(self):
 
@@ -48,3 +48,40 @@ class Map(object):
         self.map[int(indicies[0])][int(indicies[1])].qSouth = -100.0
         self.map[int(indicies[0])][int(indicies[1])].qEast = -100.0
         self.map[int(indicies[0])][int(indicies[1])].qWest = -100.0
+
+
+    def printMapQvalues(self):
+        for row in self.map:
+            top = ""
+            middle = ""
+            bottom = ""
+            for item in row:
+                if item.isWall:
+                    middle += "####"
+                else:
+                    top += "    " + item.qNorth.__str__()
+                    middle += item.qWest.__str__() + "   " + item.qEast.__str__()
+                    bottom += "     " + item.qSouth.__str__()
+
+            print(top)
+            print(middle)
+            print(bottom)
+            print()
+
+    def printMapNvalues(self):
+        for row in self.map:
+            top = ""
+            middle = ""
+            bottom = ""
+            for item in row:
+                if item.isWall:
+                    middle += "####"
+                else:
+                    top += "    " + item.nNorth.__str__()
+                    middle += item.nWest.__str__() + "   " + item.nEast.__str__()
+                    bottom += "     " + item.nSouth.__str__()
+
+            print(top)
+            print(middle)
+            print(bottom)
+            print()
