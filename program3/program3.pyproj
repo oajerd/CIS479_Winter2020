@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>a684bd99-d37a-441e-8b30-4f7ac2e566cf</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>program3.py</StartupFile>
+    <StartupFile>program.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -24,7 +24,10 @@
     <Compile Include="Maze.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="program3.py" />
+    <Compile Include="program.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Learning.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

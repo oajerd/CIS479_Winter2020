@@ -1,70 +1,90 @@
 from Maze import Node
 from Maze import Map
 from random import random
-from random import seed
+from random import randrange
 
 class QLearning(object):
     def __init__(self, lamda, maze_map):
         self._lambda = lamda
         self.current_location = [0,0]
-        self.map = maze_map
+        self.maze = maze_map
 
     def run_cycle(self):
         good_node = False
         
         # find a random start location that is not a wall
         while good_node == False:
-            x_start = random.randint(0, 7)
-            y_start = random.randint(0, 6)
+            x_start = randrange(0, 7)
+            y_start = randrange(0, 6)
             self.current_location = [x_start, y_start]
-            current_node = self.map[self.current_location[0], self.current_location[1]]
+            current_node = self.maze.map[self.current_location[0]][self.current_location[1]]
             if current_node.isWall == False:
                 good_node = True
 
         found_goal = False
 
         while found_goal == False:
-            current_node = self.map[self.current_location[0], self.current_location[1]]
+            current_node = self.maze.map[self.current_location[0]][self.current_location[1]]
             if current_node.qNorth == 100.0:
                 found_goal = True
             else:
-                action = self.determine_action(current)
-                next_location = self.calculate_next_location(current_node, action, current_location[0], current_location[1])
+                action = self.determine_action(current_node)
+                next_location = self.drift_next_location(current_node, action, self.current_location[0], self.current_location[1])
+                
+                next_node = Node(False, [0.0,0.0,0.0,0.0], [0,0,0,0])
+
+                if next_location[0] < 0 or next_location[1] < 0 or next_location[0] > 6 or next_location[1] > 5:
+                    next_node = Node(True, [0.0,0.0,0.0,0.0], [0,0,0,0])
+                else:
+                    next_node = self.maze.map[next_location[0]][next_location[1]]
 
                 # update the n value for the current state and action
-                n_updated = self.calculate_n(current_node, action)
+                n_updated = self.calculate_n(self.maze.map[self.current_location[0]][self.current_location[1]], action)
+
                 if action == "n":
-                    self.map[self.current_location[0], self.current_location[1]].nNorth = n_updated
+                    self.maze.map[self.current_location[0]][self.current_location[1]].nNorth = n_updated
                 if action == "e":
-                    self.map[self.current_location[0], self.current_location[1]].nEast = n_updated
+                    self.maze.map[self.current_location[0]][self.current_location[1]].nEast = n_updated
                 if action == "s":
-                    self.map[self.current_location[0], self.current_location[1]].nSouth = n_updated
+                    self.maze.map[self.current_location[0]][self.current_location[1]].nSouth = n_updated
                 if action == "w":
-                    self.map[self.current_location[0], self.current_location[1]].nWest = n_updated
+                    self.maze.map[self.current_location[0]][self.current_location[1]].nWest = n_updated
 
+                q_updated = self.calculate_q(self.maze.map[self.current_location[0]][self.current_location[1]], action, next_node)
+                if action == "n":
+                    self.maze.map[self.current_location[0]][self.current_location[1]].qNorth = q_updated
+                if action == "e":
+                    self.maze.map[self.current_location[0]][self.current_location[1]].qEast = q_updated
+                if action == "s":
+                    self.maze.map[self.current_location[0]][self.current_location[1]].qSouth = q_updated
+                if action == "w":
+                    self.maze.map[self.current_location[0]][self.current_location[1]].qWest = q_updated
 
+                if next_node.isWall == False:
+                    self.current_location = next_location
+        
+        self.maze.print_optimal_path()
 
     def determine_action(self, node):
-        seed(1)
         action_prob = random()
         action = ""
 
         if action_prob <= 0.95:
             q_max = 0.0
-            if node.qNorth > q_max:
+            if node.qNorth >= q_max:
                 q_max = node.qNorth
                 action = "n"
-            if node.qSouth > q_max:
+            if node.qSouth >= q_max:
                 q_max = node.qSouth
                 action = "s"
-            if node.qEast > q_max:
+            if node.qEast >= q_max:
                 q_max = node.qEast
                 action = "e"
-            if node.qWest > q_max:
+            if node.qWest >= q_max:
                 q_max = node.qWest
                 action = "w"
         else:
-            rand_action = random.randint(1,4)
+            rand_action = randrange(1,4)
             if rand_action == 1:
                 action = "n"
             elif rand_action == 2:
@@ -100,16 +120,16 @@ class QLearning(object):
             current_n = current.nWest
             reward = -2.0
 
-        if next.qNorth > q_next_max:
-            q_max = next.qNorth
-        if next.qSouth > q_next_max:
-            q_max = next.qSouth
-        if next.qEast > q_next_max:
-            q_max = next.qEast
-        if next.qWest > q_next_max:
-            q_max = next.qWest
+        if next.qNorth >= q_next_max:
+            q_next_max = next.qNorth
+        if next.qSouth >= q_next_max:
+            q_next_max = next.qSouth
+        if next.qEast >= q_next_max:
+            q_next_max = next.qEast
+        if next.qWest >= q_next_max:
+            q_next_max = next.qWest
 
-        updated_q = current_q + ((1.0/float(current_n)) * (reward + (self._lambda * q_max) - current_q))
+        updated_q = current_q + ((1.0/float(current_n)) * (reward + (self._lambda * q_next_max) - current_q))
 
         return updated_q
 
@@ -127,7 +147,21 @@ class QLearning(object):
         
         return n
 
-    def calculate_next_location(self, current, action, x, y):
+    def actual_next_location(self, current, action, x, y):
+        next_location = [0,0]
+
+        if action == "n":
+            next_location = [x, y+1]
+        if action == "e":
+            next_location = [x+1, y]
+        if action == "s":
+            next_location = [x, y-1]
+        if action == "w":
+            next_location = [x-1, y]
+
+        return next_location
+
+    def drift_next_location(self, current, action, x, y):
         next_location = [0,0]
 
         drift_prob = random()
@@ -168,6 +202,3 @@ class QLearning(object):
                 next_location = [x, y-1] # move south instead
 
         return next_location
-
-
-newMap = Map("walls.txt", "goals.txt", 7, 7)

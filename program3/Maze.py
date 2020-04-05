@@ -1,24 +1,23 @@
-import numpy
-
 class Node(object):
     
-    def __init__(self, wall, qValues = [0], nValues = [0]):
+    def __init__(self, wall, qValues, nValues):
 
         self.isWall = wall
 
-        if(self.isWall == False):
-            self.qNorth = qValues[0]
-            self.qEast = qValues[1]
-            self.qSouth = qValues[2]
-            self.qWest = qValues[3]
+        self.qNorth = qValues[0]
+        self.qEast = qValues[1]
+        self.qSouth = qValues[2]
+        self.qWest = qValues[3]
 
-            self.nNorth = nValues[0]
-            self.nEast = nValues[1]
-            self.nSouth = nValues[2]
-            self.nWest = nValues[3]
+        self.nNorth = nValues[0]
+        self.nEast = nValues[1]
+        self.nSouth = nValues[2]
+        self.nWest = nValues[3]
 
 class Map(object):
     def __init__(self, wall_file, goal_file, size_x, size_y):
+        self.x = size_x
+        self.y = size_y
         self._wall_file = wall_file
         self._goal_file = goal_file
         self.map = [[Node(False, [0.0,0.0,0.0,0.0],[0,0,0,0]) for i in range(size_x)] for j in range(size_y)]
@@ -48,3 +47,36 @@ class Map(object):
         self.map[int(indicies[0])][int(indicies[1])].qSouth = -100.0
         self.map[int(indicies[0])][int(indicies[1])].qEast = -100.0
         self.map[int(indicies[0])][int(indicies[1])].qWest = -100.0
+
+    def print_optimal_path(self):
+        for x in range(0, self.x):
+            line_str = ""
+            for y in range(0, self.y):
+                if self.map[x][y].isWall == False:
+                    q_max = 0.0
+                    if self.map[x][y].qNorth > q_max:
+                        q_max = self.map[x][y].qNorth
+                        action = "n"
+                    if self.map[x][y].qSouth > q_max:
+                        q_max = self.map[x][y].qSouth
+                        action = "s"
+                    if self.map[x][y].qEast > q_max:
+                        q_max = self.map[x][y].qEast
+                        action = "e"
+                    if self.map[x][y].qWest > q_max:
+                        q_max = self.map[x][y].qWest
+                        action = "w"
+
+                    if action == "n":
+                        line_str += "^^^^    "
+                    if action == "e":
+                        line_str += ">>>>    "
+                    if action == "s":
+                        line_str += "vvvv    "
+                    if action == "w":
+                        line_str += "<<<<    "
+                else:
+                    line_str += "####    "
+            print(line_str)
+
+                
